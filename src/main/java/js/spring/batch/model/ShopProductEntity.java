@@ -6,7 +6,7 @@ import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.math.BigInteger;
+import java.util.List;
 
 @Getter
 @Setter
@@ -21,6 +21,10 @@ public class ShopProductEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_id", nullable = false)
     private Integer id;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "product_id")
+    private List<ShopOrderEntity> orders;
 
     @Column(name = "product_name")
     private String productName;

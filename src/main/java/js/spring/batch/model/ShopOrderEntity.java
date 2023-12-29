@@ -7,9 +7,7 @@ import org.hibernate.proxy.HibernateProxy;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -26,19 +24,10 @@ public class ShopOrderEntity implements Serializable {
     @Column(name = "order_id", nullable = false)
     private Integer orderId;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "user_id")
-    private List<ShopUserEntity> users;
-
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "product_id")
-    private List<ShopProductEntity> products;
-
     private Integer quantity;
 
     @Column(name = "order_date")
     private LocalDateTime orderDate;
-
 
     @Override
     public final boolean equals(Object o) {

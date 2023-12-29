@@ -8,7 +8,6 @@ import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteExcep
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.support.CronExpression;
@@ -30,12 +29,12 @@ public class JobScheduler {
     private JobLauncher jobLauncher;
 
     @Autowired
-    @Qualifier(value = "csvJob")
+    @Qualifier(value = "createFakeShopOrderJob")
     private Job job;
 
 
 
-    @Scheduled(cron = "0 30 15 * * *")
+    @Scheduled(cron = "0 21 18 * * *")
     public void run() throws Exception {
 
         runJob();
