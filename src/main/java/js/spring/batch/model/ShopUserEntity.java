@@ -7,6 +7,7 @@ import lombok.Setter;
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -25,4 +26,7 @@ public class ShopUserEntity implements Serializable {
     private String username;
 
     private String email;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 }
