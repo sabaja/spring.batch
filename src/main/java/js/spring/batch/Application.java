@@ -11,21 +11,21 @@ import org.springframework.context.annotation.Bean;
 public class Application {
 
 
-	public static void main(String[] args) {
-		SpringApplication.run(Application.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
 
 
-	@Bean
-	public CommandLineRunner commandLineRunner(ApplicationContext
-														   context) {
-		return args -> {
-			// Ottieni il bean dal contesto
-			JobScheduler myBean = context.getBean(JobScheduler.class);
+    @Bean
+    public CommandLineRunner commandLineRunner(ApplicationContext
+                                                       context) {
+        return args -> {
+            // Ottieni il bean dal contesto
+            JobScheduler myBean = context.getBean(JobScheduler.class);
 
-			// Chiama il metodo del bean
-			myBean.run();
-		};
-	}
+            // Chiama il metodo del bean
+            myBean.run();
+        };
+    }
 }
 

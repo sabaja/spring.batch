@@ -22,7 +22,6 @@ import java.util.Objects;
 public class CreateShopWriter implements ItemWriter<ShopOrderDto> {
 
 
-
     private final ShopProductRepository shopProductRepository;
     private final ShopUserRepository shopUserRepository;
     private final ShopOrderRepository shopOrderRepository;
@@ -58,6 +57,7 @@ public class CreateShopWriter implements ItemWriter<ShopOrderDto> {
             shopUserRepository.save(shopUserEntity);
         }
     }
+
     private void saveProductUser() {
         if (Objects.nonNull(orderEntity) && Objects.nonNull(orderDto)) {
             ShopProductEntity shopProductEntity = shopProductRepository.findByProductName(orderDto.getProduct());

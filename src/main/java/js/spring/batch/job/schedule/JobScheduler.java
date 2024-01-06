@@ -33,7 +33,6 @@ public class JobScheduler {
     private Job job;
 
 
-
     @Scheduled(cron = "0 21 18 * * *")
     public void run() throws Exception {
 
@@ -71,9 +70,18 @@ public class JobScheduler {
 
     static class Location {
         String name;
-        Location(String name) { this.name = name; }
-        void setName(String name) { this.name = name; }
-        String getName() { return this.name; }
+
+        Location(String name) {
+            this.name = name;
+        }
+
+        void setName(String name) {
+            this.name = name;
+        }
+
+        String getName() {
+            return this.name;
+        }
     }
 
     public static void main(String[] args) {
