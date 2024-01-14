@@ -3,7 +3,7 @@ package js.spring.batch.job.listener;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;
 
-import static js.spring.batch.job.listener.ShopUtils.*;
+import static js.spring.batch.job.listener.ShopUtils.DATETIME_ARG;
 
 public class CreateUserJobListener implements JobExecutionListener {
 

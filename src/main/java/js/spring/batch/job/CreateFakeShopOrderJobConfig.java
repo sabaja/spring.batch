@@ -2,7 +2,6 @@ package js.spring.batch.job;
 
 import jakarta.persistence.EntityManagerFactory;
 import js.spring.batch.dto.ShopOrderDto;
-import js.spring.batch.job.listener.CreateUserJobListener;
 import js.spring.batch.job.listener.CreateUserStepListener;
 import js.spring.batch.job.processor.CreateUserProcessor;
 import js.spring.batch.job.writer.CreateShopWriter;
