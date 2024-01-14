@@ -2,12 +2,15 @@ package js.spring.batch.job;
 
 import jakarta.persistence.EntityManagerFactory;
 import js.spring.batch.dto.ShopOrderDto;
+import js.spring.batch.job.listener.CreateUserJobListener;
+import js.spring.batch.job.listener.CreateUserStepListener;
 import js.spring.batch.job.processor.CreateUserProcessor;
 import js.spring.batch.job.writer.CreateShopWriter;
 import js.spring.batch.model.ShopProductEntity;
 import js.spring.batch.model.ShopUserEntity;
 import js.spring.batch.repository.ShopProductRepository;
 import js.spring.batch.repository.ShopUserRepository;
+import js.spring.batch.service.ShopUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -52,10 +55,12 @@ public class CreateFakeShopOrderJobConfig {
     private final PlatformTransactionManager platformTransactionManager;
     private final CreateShopWriter createShopWriter;
     private final EntityManagerFactory entityManagerFactory;
+    private final ShopUserService shopUserService;
 
     @Bean
     public Job createFakeShopOrderJob() {
         return new JobBuilder("createFakeShopOrderJob", jobRepository)
+//                .listener(new CreateUserJobListener())
                 .incrementer(new RunIdIncrementer())
                 .start(createUserStep())
 //                .next(createProductStep())
@@ -67,12 +72,15 @@ public class CreateFakeShopOrderJobConfig {
     @Bean
     public Step createUserStep() {
         return new StepBuilder("createUserStep", jobRepository)
+                .listener(new CreateUserStepListener(shopUserService))
                 .<ShopUserEntity, Future<ShopUserEntity>>chunk(200, platformTransactionManager)
+
                 .reader(createUserReader())
                 .processor(asyncUserProcessor())
                 .writer(asyncUserWriter())
                 .taskExecutor(taskExecutor())
                 .faultTolerant()
+
                 .build();
 
     }
@@ -83,7 +91,7 @@ public class CreateFakeShopOrderJobConfig {
 //        //flatFileItemReader is not thread safe
 //        FlatFileItemReader<ShopUserEntity> reader = new FlatFileItemReader<>();
 //        reader.setName("createUserReader");
-//        reader.setResource(new FileSystemResource("src/main/resources/data/users.csv"));
+    //        reader.setResource(new FileSystemResource("src/main/resources/data/users.csv"));
 //        reader.setLineMapper(createUserLineMapper());
 //
 //        return reader;
