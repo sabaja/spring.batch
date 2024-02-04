@@ -3,6 +3,7 @@ package js.spring.batch.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -12,6 +13,7 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
+@ToString
 @Table(name = "shop_user")
 public class ShopUserEntity implements Serializable {
 
@@ -23,6 +25,7 @@ public class ShopUserEntity implements Serializable {
     @Column(name = "user_id", nullable = false)
     private Integer id;
 
+    @ToString.Exclude
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "user_id")
     private List<ShopOrderEntity> orders;

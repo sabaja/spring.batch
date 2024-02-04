@@ -1,35 +1,52 @@
 package js.spring.batch.job.listener;
 
-import js.spring.batch.model.ShopUserEntity;
-import js.spring.batch.service.ShopUserService;
+import js.spring.batch.dto.ExecutionContainer;
+import lombok.Getter;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.batch.core.ExitStatus;
+import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
-import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Optional;
+
+import static js.spring.batch.job.listener.ShopUtils.DATETIME_ARG;
+
 
 @RequiredArgsConstructor
-@Component
 public class CreateUserStepListener implements StepExecutionListener {
 
-    private final ShopUserService shopUserService;
+
+    private final ExecutionContainer executionContainer;
+
 
     @Override
-    public void beforeStep(StepExecution stepExecution) {
+    public void beforeStep(@NonNull StepExecution stepExecution) {
         StepExecutionListener.super.beforeStep(stepExecution);
-        String createdAtStr = "2023-12-01 00:00:00.000";
+        JobExecution jobExecution = stepExecution.getJobExecution();
         DateTimeFormatter formatter = ShopUtils.DATE_TIME_FORMATTER;
-        Optional<List<ShopUserEntity>> users = shopUserService.findAllShopUsersByCreatedAtEqualsAndAfter(LocalDateTime.parse(createdAtStr, formatter));
-        users.ifPresent(shopUserService::deleteAllInBatch);
+        jobExecution.getExecutionContext().put(DATETIME_ARG, LocalDateTime.now().format(formatter));
+        this.executionContainer.setJobExecution(jobExecution);
     }
 
     @Override
-    public ExitStatus afterStep(StepExecution stepExecution) {
+    public ExitStatus afterStep(@NonNull StepExecution stepExecution) {
         return StepExecutionListener.super.afterStep(stepExecution);
     }
+
+    /*
+    @Override
+    public void beforeJob(@NonNull JobExecution jobExecution) {
+        JobExecutionListener.super.beforeJob(jobExecution);
+        ExecutionContext executionContext = new ExecutionContext();
+        DateTimeFormatter formatter = ShopUtils.DATE_TIME_FORMATTER;
+        executionContext.put(DATETIME_ARG, LocalDateTime.now().format(formatter));
+        LocalDateTime launchDate = jobExecution.getJobParameters().getLocalDateTime("launchDate");
+        jobExecution.setExecutionContext(executionContext);
+    }
+*/
+
 }

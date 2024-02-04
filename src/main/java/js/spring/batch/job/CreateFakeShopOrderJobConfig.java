@@ -1,6 +1,7 @@
 package js.spring.batch.job;
 
 import jakarta.persistence.EntityManagerFactory;
+import js.spring.batch.dto.ExecutionContainer;
 import js.spring.batch.dto.ShopOrderDto;
 import js.spring.batch.job.listener.CreateUserStepListener;
 import js.spring.batch.job.processor.CreateUserProcessor;
@@ -57,9 +58,14 @@ public class CreateFakeShopOrderJobConfig {
     private final ShopUserService shopUserService;
 
     @Bean
+    public ExecutionContainer executionContainer() {
+        return new ExecutionContainer();
+    }
+
+
+    @Bean
     public Job createFakeShopOrderJob() {
         return new JobBuilder("createFakeShopOrderJob", jobRepository)
-//                .listener(new CreateUserJobListener())
                 .incrementer(new RunIdIncrementer())
                 .start(createUserStep())
 //                .next(createProductStep())
@@ -70,12 +76,13 @@ public class CreateFakeShopOrderJobConfig {
 
     @Bean
     public Step createUserStep() {
+        ExecutionContainer executionContainer = executionContainer();
         return new StepBuilder("createUserStep", jobRepository)
-                .listener(new CreateUserStepListener(shopUserService))
                 .<ShopUserEntity, Future<ShopUserEntity>>chunk(200, platformTransactionManager)
+                .listener(new CreateUserStepListener(executionContainer))
 
                 .reader(createUserReader())
-                .processor(asyncUserProcessor())
+                .processor(asyncUserProcessor(executionContainer))
                 .writer(asyncUserWriter())
                 .taskExecutor(taskExecutor())
                 .faultTolerant()
@@ -84,17 +91,6 @@ public class CreateFakeShopOrderJobConfig {
 
     }
 
-
-//    @Bean
-//    public ItemStreamReader<ShopUserEntity> createUserReader() {
-//        //flatFileItemReader is not thread safe
-//        FlatFileItemReader<ShopUserEntity> reader = new FlatFileItemReader<>();
-//        reader.setName("createUserReader");
-    //        reader.setResource(new FileSystemResource("src/main/resources/data/users.csv"));
-//        reader.setLineMapper(createUserLineMapper());
-//
-//        return reader;
-//    }
 
     @Bean
     public SynchronizedItemStreamReader<ShopUserEntity> createUserReader() {
@@ -112,9 +108,9 @@ public class CreateFakeShopOrderJobConfig {
     }
 
     @Bean
-    public AsyncItemProcessor<ShopUserEntity, ShopUserEntity> asyncUserProcessor() {
+    public AsyncItemProcessor<ShopUserEntity, ShopUserEntity> asyncUserProcessor(ExecutionContainer executionContainer) {
         AsyncItemProcessor<ShopUserEntity, ShopUserEntity> asyncItemProcessor = new AsyncItemProcessor<>();
-        asyncItemProcessor.setDelegate(new CreateUserProcessor());
+        asyncItemProcessor.setDelegate(new CreateUserProcessor(executionContainer));
         asyncItemProcessor.setTaskExecutor(taskExecutor());
         return asyncItemProcessor;
     }
