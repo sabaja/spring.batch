@@ -22,7 +22,7 @@ public class FileMessageToJobRequest {
     @Transformer
     public JobLaunchRequest toRequest(Message<File> message) {
         JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
-        jobParametersBuilder.addLocalDateTime("time", LocalDateTime.now());
+        jobParametersBuilder.addLocalDateTime("start", LocalDateTime.now());
         jobParametersBuilder.addString("input.file.name", message.getPayload().getAbsolutePath());
         return new JobLaunchRequest(job, jobParametersBuilder.toJobParameters());
 

@@ -1,11 +1,13 @@
 package js.spring.batch.job;
 
 import jakarta.persistence.EntityManagerFactory;
+import js.spring.batch.BatchChunkRepository;
 import js.spring.batch.dto.ExecutionContainer;
 import js.spring.batch.dto.ShopOrderDto;
 import js.spring.batch.job.listener.CreateUserStepListener;
 import js.spring.batch.job.processor.CreateUserProcessor;
 import js.spring.batch.job.writer.CreateShopWriter;
+import js.spring.batch.model.BatchChunk;
 import js.spring.batch.model.ShopProductEntity;
 import js.spring.batch.model.ShopUserEntity;
 import js.spring.batch.repository.ShopProductRepository;
@@ -41,6 +43,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -56,6 +59,7 @@ public class CreateFakeShopOrderJobConfig {
     private final CreateShopWriter createShopWriter;
     private final EntityManagerFactory entityManagerFactory;
     private final ShopUserService shopUserService;
+    private final BatchChunkRepository batchChunkRepository;
 
     @Bean
     public ExecutionContainer executionContainer() {
@@ -77,8 +81,9 @@ public class CreateFakeShopOrderJobConfig {
     @Bean
     public Step createUserStep() {
         ExecutionContainer executionContainer = executionContainer();
+        Optional<BatchChunk> batchChunk = batchChunkRepository.findByJobName("createFakeShopOrderJob");
         return new StepBuilder("createUserStep", jobRepository)
-                .<ShopUserEntity, Future<ShopUserEntity>>chunk(200, platformTransactionManager)
+                .<ShopUserEntity, Future<ShopUserEntity>>chunk(batchChunk.map(BatchChunk::getChunkSize).map(Long::intValue).orElseGet(() -> 200), platformTransactionManager)
                 .listener(new CreateUserStepListener(executionContainer))
 
                 .reader(createUserReader())

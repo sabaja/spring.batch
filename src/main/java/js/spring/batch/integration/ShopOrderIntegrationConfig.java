@@ -7,8 +7,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.annotation.IntegrationComponentScan;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.config.EnableIntegration;
+import org.springframework.integration.file.DefaultFileNameGenerator;
+import org.springframework.integration.file.FileNameGenerator;
 import org.springframework.integration.file.FileReadingMessageSource;
+import org.springframework.integration.file.FileWritingMessageHandler;
 import org.springframework.integration.file.filters.SimplePatternFileListFilter;
+import org.springframework.integration.file.support.FileExistsMode;
+import org.springframework.messaging.MessageHandler;
 
 import java.io.File;
 
@@ -40,6 +45,24 @@ public class ShopOrderIntegrationConfig {
     @Bean
     public DirectChannel requests() {
         return new DirectChannel();
+    }
+
+
+    /*Per rinominare il file una volta letto e scritto*/
+    @Bean
+    public MessageHandler fileRenameProcessingHandler() {
+        FileWritingMessageHandler fileWritingMessageHandler = new FileWritingMessageHandler(new File(shopUserDirectory));
+        fileWritingMessageHandler.setFileExistsMode(FileExistsMode.REPLACE);
+        fileWritingMessageHandler.setFileNameGenerator(fileNamGenerator());
+        fileWritingMessageHandler.setRequiresReply(Boolean.FALSE);
+        return fileWritingMessageHandler;
+    }
+
+    private FileNameGenerator fileNamGenerator() {
+        DefaultFileNameGenerator defaultFileNameGenerator = new DefaultFileNameGenerator();
+        //con questa espressonio spring va a prendere il nome del payload e gli carica il prefisso processing
+        defaultFileNameGenerator.setExpression("payload.name + '.processing'");
+        return defaultFileNameGenerator;
     }
 
 }
