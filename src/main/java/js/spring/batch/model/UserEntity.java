@@ -12,10 +12,10 @@ import java.util.List;
 
 @Getter
 @Setter
-@Entity
 @ToString
+@Entity
 @Table(name = "shop_user")
-public class ShopUserEntity implements Serializable {
+public class UserEntity implements Serializable {
 
     @Serial
     private static final long serialVersionUID = -3072266355966911096L;
@@ -28,7 +28,7 @@ public class ShopUserEntity implements Serializable {
     @ToString.Exclude
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "user_id")
-    private List<ShopOrderEntity> orders;
+    private List<OrderEntity> orders;
 
     private String username;
 

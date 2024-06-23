@@ -31,11 +31,6 @@ public class CreateFakeShopOrderJobConfigTest {
     @Autowired
     private DataSource dataSource;
 
-//    @Autowired
-//    public void setDataSource(DataSource dataSource) {
-//        this.jdbcTemplate = new JdbcTemplate(dataSource);
-//    }
-
 
     @AfterAll
     public static void cleanUp() {
@@ -51,17 +46,5 @@ public class CreateFakeShopOrderJobConfigTest {
         // Verify that the job succeeded
         assertThat(jobExecution.getStatus()).isEqualTo(BatchStatus.COMPLETED);
 
-//        // Verify the number of items processed by each step
-//        Collection<StepExecution> stepExecutions = jobExecution.getStepExecutions();
-//
-//        // Step 1: Create Users
-//        StepExecution createUserStepExecution = stepExecutions.get(0);
-//        assertThat(createUserStepExecution.getReadCount()).isEqualTo(100);
-//        assertThat(createUserStepExecution.getWriteCount()).isEqualTo(100);
-//
-//        // Step 2: Create Products
-//        StepExecution createProductStepExecution = stepExecutions.get(1);
-//        assertThat(createProductStepExecution.getReadCount()).isEqualTo(50);
-//        assertThat(createProductStepExecution.getWriteCount()).isEqualTo(50);
     }
 }

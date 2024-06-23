@@ -12,7 +12,7 @@ import java.util.List;
 @Setter
 @Entity
 @Table(name = "shop_product")
-public class ShopProductEntity implements Serializable {
+public class ProductEntity implements Serializable {
 
     @Serial
     private static final long serialVersionUID = -7658157634134976766L;
@@ -24,7 +24,7 @@ public class ShopProductEntity implements Serializable {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "product_id")
-    private List<ShopOrderEntity> orders;
+    private List<OrderEntity> orders;
 
     @Column(name = "product_name")
     private String productName;

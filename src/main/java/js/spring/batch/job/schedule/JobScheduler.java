@@ -32,6 +32,17 @@ public class JobScheduler {
     @Qualifier(value = "createFakeShopOrderJob")
     private Job job;
 
+    public static void main(String[] args) {
+        List<Location> locations = new ArrayList<>();
+        locations.add(new Location("Ashburn"));
+        locations.add(new Location("Broadlands"));
+
+        Consumer<Location> capitalizeLocation = location -> location.setName(location.getName().toUpperCase());
+
+        locations.forEach(capitalizeLocation); // Capitalize the Locations
+
+        locations.forEach(location -> System.out.println(location.getName())); // Print capitalized locations
+    }
 
     @Scheduled(cron = "0 21 18 * * *")
     public void run() throws Exception {
@@ -75,24 +86,12 @@ public class JobScheduler {
             this.name = name;
         }
 
-        void setName(String name) {
-            this.name = name;
-        }
-
         String getName() {
             return this.name;
         }
-    }
 
-    public static void main(String[] args) {
-        List<Location> locations = new ArrayList<>();
-        locations.add(new Location("Ashburn"));
-        locations.add(new Location("Broadlands"));
-
-        Consumer<Location> capitalizeLocation = location -> location.setName(location.getName().toUpperCase());
-
-        locations.forEach(capitalizeLocation); // Capitalize the Locations
-
-        locations.forEach(location -> System.out.println(location.getName())); // Print capitalized locations
+        void setName(String name) {
+            this.name = name;
+        }
     }
 }

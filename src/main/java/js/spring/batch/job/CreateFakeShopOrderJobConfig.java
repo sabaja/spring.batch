@@ -6,12 +6,11 @@ import js.spring.batch.dto.ExecutionContainer;
 import js.spring.batch.dto.ShopOrderDto;
 import js.spring.batch.job.listener.CreateUserStepListener;
 import js.spring.batch.job.processor.CreateUserProcessor;
-import js.spring.batch.job.writer.CreateShopWriter;
 import js.spring.batch.model.BatchChunk;
-import js.spring.batch.model.ShopProductEntity;
-import js.spring.batch.model.ShopUserEntity;
-import js.spring.batch.repository.ShopProductRepository;
-import js.spring.batch.repository.ShopUserRepository;
+import js.spring.batch.model.ProductEntity;
+import js.spring.batch.model.UserEntity;
+import js.spring.batch.repository.ProductRepository;
+import js.spring.batch.repository.UserRepository;
 import js.spring.batch.service.ShopUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
@@ -52,11 +51,10 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class CreateFakeShopOrderJobConfig {
 
 
-    private final ShopUserRepository shopUserRepository;
-    private final ShopProductRepository shopProductRepository;
+    private final UserRepository userRepository;
+    private final ProductRepository productRepository;
     private final JobRepository jobRepository;
     private final PlatformTransactionManager platformTransactionManager;
-    private final CreateShopWriter createShopWriter;
     private final EntityManagerFactory entityManagerFactory;
     private final ShopUserService shopUserService;
     private final BatchChunkRepository batchChunkRepository;
@@ -83,9 +81,8 @@ public class CreateFakeShopOrderJobConfig {
         ExecutionContainer executionContainer = executionContainer();
         Optional<BatchChunk> batchChunk = batchChunkRepository.findByJobName("createFakeShopOrderJob");
         return new StepBuilder("createUserStep", jobRepository)
-                .<ShopUserEntity, Future<ShopUserEntity>>chunk(batchChunk.map(BatchChunk::getChunkSize).map(Long::intValue).orElseGet(() -> 200), platformTransactionManager)
+                .<UserEntity, Future<UserEntity>>chunk(batchChunk.map(BatchChunk::getChunkSize).map(Long::intValue).orElseGet(() -> 200), platformTransactionManager)
                 .listener(new CreateUserStepListener(executionContainer))
-
                 .reader(createUserReader())
                 .processor(asyncUserProcessor(executionContainer))
                 .writer(asyncUserWriter())
@@ -98,55 +95,55 @@ public class CreateFakeShopOrderJobConfig {
 
 
     @Bean
-    public SynchronizedItemStreamReader<ShopUserEntity> createUserReader() {
+    public SynchronizedItemStreamReader<UserEntity> createUserReader() {
         //flatFileItemReader is not thread safe
-        FlatFileItemReader<ShopUserEntity> reader = new FlatFileItemReader<>();
+        FlatFileItemReader<UserEntity> reader = new FlatFileItemReader<>();
         reader.setName("createUserReader");
         reader.setResource(new FileSystemResource("src/main/resources/data/users.csv"));
         reader.setLineMapper(createUserLineMapper());
 
         //https://docs.spring.io/spring-batch/reference/readers-and-writers/item-reader-writer-implementations.html
         //SynchronizedItemStreamReader in order to use it safely in a multi-threaded step
-        return new SynchronizedItemStreamReaderBuilder<ShopUserEntity>()
+        return new SynchronizedItemStreamReaderBuilder<UserEntity>()
                 .delegate(reader)
                 .build();
     }
 
     @Bean
-    public AsyncItemProcessor<ShopUserEntity, ShopUserEntity> asyncUserProcessor(ExecutionContainer executionContainer) {
-        AsyncItemProcessor<ShopUserEntity, ShopUserEntity> asyncItemProcessor = new AsyncItemProcessor<>();
+    public AsyncItemProcessor<UserEntity, UserEntity> asyncUserProcessor(ExecutionContainer executionContainer) {
+        AsyncItemProcessor<UserEntity, UserEntity> asyncItemProcessor = new AsyncItemProcessor<>();
         asyncItemProcessor.setDelegate(new CreateUserProcessor(executionContainer));
         asyncItemProcessor.setTaskExecutor(taskExecutor());
         return asyncItemProcessor;
     }
 
     @Bean
-    public JpaItemWriter<ShopUserEntity> createUserWriter() {
-        JpaItemWriter<ShopUserEntity> writer = new JpaItemWriter<>();
+    public JpaItemWriter<UserEntity> createUserWriter() {
+        JpaItemWriter<UserEntity> writer = new JpaItemWriter<>();
         writer.setEntityManagerFactory(entityManagerFactory);
         return writer;
     }
 
     @Bean
-    public AsyncItemWriter<ShopUserEntity> asyncUserWriter() {
-        AsyncItemWriter<ShopUserEntity> asyncItemWriter = new AsyncItemWriter<>();
+    public AsyncItemWriter<UserEntity> asyncUserWriter() {
+        AsyncItemWriter<UserEntity> asyncItemWriter = new AsyncItemWriter<>();
         asyncItemWriter.setDelegate(createUserWriter());
         return asyncItemWriter;
     }
 
     @Bean
-    public LineMapper<ShopUserEntity> createUserLineMapper() {
+    public LineMapper<UserEntity> createUserLineMapper() {
         /* Tokenizzatore della riga*/
         DelimitedLineTokenizer lineTokenizer = new DelimitedLineTokenizer();
         lineTokenizer.setDelimiter(",");
         lineTokenizer.setNames("username", "email", "createdAt");
 
         /* Contenitore del Bean da mappare */
-        BeanWrapperFieldSetMapper<ShopUserEntity> fieldSetMapper = new BeanWrapperFieldSetMapper<>();
-        fieldSetMapper.setTargetType(ShopUserEntity.class);
+        BeanWrapperFieldSetMapper<UserEntity> fieldSetMapper = new BeanWrapperFieldSetMapper<>();
+        fieldSetMapper.setTargetType(UserEntity.class);
         fieldSetMapper.setConversionService(conversionService());
 
-        DefaultLineMapper<ShopUserEntity> lineMapper = new DefaultLineMapper<>();
+        DefaultLineMapper<UserEntity> lineMapper = new DefaultLineMapper<>();
 
         /* mapper della linea */
         lineMapper.setLineTokenizer(lineTokenizer);
@@ -158,34 +155,25 @@ public class CreateFakeShopOrderJobConfig {
     @Bean
     public Step createProductStep() {
         return new StepBuilder("createProductStep", jobRepository)
-                .<ShopProductEntity, ShopProductEntity>chunk(1, platformTransactionManager)
+                .<ProductEntity, ProductEntity>chunk(1, platformTransactionManager)
                 .reader(createProductReader())
                 .writer(createProductWriter())
                 .taskExecutor(taskExecutor())
                 .build();
     }
 
-    @Bean
-    public Step createOrderStep() {
-        return new StepBuilder("create", jobRepository)
-                .<ShopOrderDto, ShopOrderDto>chunk(1, platformTransactionManager)
-                .reader(createOrderReader())
-                .writer(createShopWriter)
-                .taskExecutor(taskExecutor())
-                .build();
-    }
 
     @Bean
-    public JpaItemWriter<ShopProductEntity> createProductWriter() {
-        JpaItemWriter<ShopProductEntity> writer = new JpaItemWriter<>();
+    public JpaItemWriter<ProductEntity> createProductWriter() {
+        JpaItemWriter<ProductEntity> writer = new JpaItemWriter<>();
         writer.setEntityManagerFactory(entityManagerFactory);
         return writer;
     }
 
 
     @Bean
-    public ItemReader<ShopProductEntity> createProductReader() {
-        FlatFileItemReader<ShopProductEntity> reader = new FlatFileItemReader<>();
+    public ItemReader<ProductEntity> createProductReader() {
+        FlatFileItemReader<ProductEntity> reader = new FlatFileItemReader<>();
         reader.setName("createProductReader");
         reader.setResource(new FileSystemResource("src/main/resources/data/product.csv"));
         reader.setLineMapper(createProductLineMapper());
@@ -193,17 +181,17 @@ public class CreateFakeShopOrderJobConfig {
     }
 
     @Bean
-    public LineMapper<ShopProductEntity> createProductLineMapper() {
+    public LineMapper<ProductEntity> createProductLineMapper() {
         /* Tokenizzatore della riga*/
         DelimitedLineTokenizer lineTokenizer = new DelimitedLineTokenizer();
         lineTokenizer.setDelimiter(",");
         lineTokenizer.setNames("productName", "price");
 
         /* Contenitore del Bean da mappare */
-        BeanWrapperFieldSetMapper<ShopProductEntity> fieldSetMapper = new BeanWrapperFieldSetMapper<>();
-        fieldSetMapper.setTargetType(ShopProductEntity.class);
+        BeanWrapperFieldSetMapper<ProductEntity> fieldSetMapper = new BeanWrapperFieldSetMapper<>();
+        fieldSetMapper.setTargetType(ProductEntity.class);
 
-        DefaultLineMapper<ShopProductEntity> lineMapper = new DefaultLineMapper<>();
+        DefaultLineMapper<ProductEntity> lineMapper = new DefaultLineMapper<>();
 
         /* mapper della linea */
         lineMapper.setLineTokenizer(lineTokenizer);
@@ -256,12 +244,9 @@ public class CreateFakeShopOrderJobConfig {
 
     private ConversionService conversionService() {
         DefaultConversionService service = new DefaultConversionService();
-        service.addConverter(new Converter<String, LocalDateTime>() {
-            @Override
-            public LocalDateTime convert(String source) {
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
-                return LocalDateTime.parse(source, formatter);
-            }
+        service.addConverter((Converter<String, LocalDateTime>) source -> {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+            return LocalDateTime.parse(source, formatter);
         });
         return service;
     }

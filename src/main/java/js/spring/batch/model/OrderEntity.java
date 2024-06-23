@@ -10,11 +10,11 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-@Entity
-@Table(name = "shop_order")
 @Getter
 @Setter
-public class ShopOrderEntity implements Serializable {
+@Entity
+@Table(name = "shop_order")
+public class OrderEntity implements Serializable {
 
     @Serial
     private static final long serialVersionUID = -1068294390369555925L;
@@ -36,7 +36,7 @@ public class ShopOrderEntity implements Serializable {
         Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
         Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
         if (thisEffectiveClass != oEffectiveClass) return false;
-        ShopOrderEntity that = (ShopOrderEntity) o;
+        OrderEntity that = (OrderEntity) o;
         return getOrderId() != null && Objects.equals(getOrderId(), that.getOrderId());
     }
 
@@ -45,3 +45,4 @@ public class ShopOrderEntity implements Serializable {
         return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
     }
 }
+
